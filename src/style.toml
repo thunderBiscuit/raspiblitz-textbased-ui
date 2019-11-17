@@ -1,0 +1,11 @@
+# more complete example at https://github.com/gyscos/cursive/blob/master/assets/style.toml
+
+shadow = false
+
+[colors]
+	# backgrounds
+	background = "#F7931A"
+	view       = "#4D4D4D"
+
+  # text
+	primary   = "white"
