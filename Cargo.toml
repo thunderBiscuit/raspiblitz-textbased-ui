@@ -1,10 +1,8 @@
 [package]
-name = "raspiblitz-tui"
+name = "raspiblitz-textbased-ui"
 version = "0.1.0"
 authors = ["thunderBiscuit <thunderB@protonmail.com>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 cursive = "0.13"
