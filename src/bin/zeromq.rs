@@ -1,17 +1,22 @@
 fn main() {
-    println!("Hello, world!");
 
-    let ctx = zmq::Context::new();
+    let port: u16 = 29000;
+    let tcp_address = format!("tcp://127.0.0.1:{}", port);
+    let subscription = b"hashblock";
+    
+    println!("Currently listening on port {}.", port);
 
-    let socket = ctx.socket(zmq::SUB).unwrap();
-    // let socket = ctx.socket(zmq::PULL).unwrap();
-    // let socket = ctx.socket(zmq::STREAM).unwrap();
-    socket.connect("tcp://127.0.0.1:28332").unwrap();
+    let context = zmq::Context::new();
+
+    let socket = context.socket(zmq::SUB).unwrap();
+    socket.connect(&tcp_address).unwrap();
+    socket.set_subscribe(subscription).unwrap();
+    
     loop {
         let data = socket.recv_multipart(0).unwrap();
         println!(
-            "Identity: {:?} Message : {}",
-            data[0],
+            "Subscription: {}\nMessage : {}",
+            std::str::from_utf8(&data[0]).unwrap(),
             hex::encode(&data[1])
         );
     }
