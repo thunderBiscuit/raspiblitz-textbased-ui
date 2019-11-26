@@ -1,21 +1,4 @@
-#!/usr/bin/env python3
-# Copyright (c) 2014-2018 The Bitcoin Core developers
-# Distributed under the MIT software license, see the accompanying
-# file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
-"""
-    ZMQ example using python3's asyncio
-    Bitcoin should be started with the command line arguments:
-        bitcoind -testnet -daemon \
-                -zmqpubrawtx=tcp://127.0.0.1:28332 \
-                -zmqpubrawblock=tcp://127.0.0.1:28332 \
-                -zmqpubhashtx=tcp://127.0.0.1:28332 \
-                -zmqpubhashblock=tcp://127.0.0.1:28332
-    We use the asyncio library here.  `self.handle()` installs itself as a
-    future at the end of the function.  Since it never returns with the event
-    loop having an empty stack of futures, this creates an infinite loop.  An
-    alternative is to wrap the contents of `handle` inside `while True`.
-"""
+# full example: https://github.com/bitcoin/bitcoin/blob/master/contrib/zmq/zmq_sub.py
 
 import binascii
 import asyncio
@@ -33,11 +16,8 @@ class ZMQHandler():
 
         self.zmqSubSocket = self.zmqContext.socket(zmq.SUB)
         self.zmqSubSocket.setsockopt(zmq.RCVHWM, 0)
-        self.zmqSubSocket.setsockopt_string(zmq.SUBSCRIBE, "hashblock")
-        self.zmqSubSocket.setsockopt_string(zmq.SUBSCRIBE, "hashtx")
         self.zmqSubSocket.setsockopt_string(zmq.SUBSCRIBE, "rawblock")
-        self.zmqSubSocket.setsockopt_string(zmq.SUBSCRIBE, "rawtx")
-        self.zmqSubSocket.connect("tcp://127.0.0.1:%i" % port)
+        self.zmqSubSocket.connect(f"tcp://127.0.0.1:{port}")
 
     async def handle(self) :
         msg = await self.zmqSubSocket.recv_multipart()
@@ -47,18 +27,9 @@ class ZMQHandler():
         if len(msg[-1]) == 4:
           msgSequence = struct.unpack('<I', msg[-1])[-1]
           sequence = str(msgSequence)
-        if topic == b"hashblock":
-            print('- HASH BLOCK ('+sequence+') -')
-            print(binascii.hexlify(body))
-        elif topic == b"hashtx":
-            print('- HASH TX  ('+sequence+') -')
-            print(binascii.hexlify(body))
-        elif topic == b"rawblock":
+        if topic == b"rawblock":
             print('- RAW BLOCK HEADER ('+sequence+') -')
             print(binascii.hexlify(body[:80]))
-        elif topic == b"rawtx":
-            print('- RAW TX ('+sequence+') -')
-            print(binascii.hexlify(body))
         # schedule ourselves to receive the next message
         asyncio.ensure_future(self.handle())
 
